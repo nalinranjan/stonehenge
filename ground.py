@@ -42,27 +42,3 @@ class Ground(SceneObject):
 
         self.load_texture(GRASS_TEXTURE_PATH)
         self.set_buffers()
-
-if __name__ == "__main__":
-    if not glfw.init():
-        exit()
-
-    glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
-    glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 4)
-    glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
-
-    width, height = 1280, 720
-
-    # Create a windowed mode window and its OpenGL context
-    window = glfw.create_window(width, height, "GLFW Test", None, None) #glfw.get_primary_monitor()
-    if not window:
-        glfw.terminate()
-        exit()
-
-    # Make the window's context current
-    glfw.make_context_current(window)
-    glfw.swap_interval(1)
-
-    glViewport(0, 0, width, height)
-
-    g = Ground()

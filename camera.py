@@ -37,8 +37,8 @@ class Camera(object):
                                    ((self.right+self.left)/(self.right-self.left)),
                                    ((self.top+self.bottom)/(self.top-self.bottom)),
                                    ((-1.0*(self.far+self.near)) / (self.far-self.near)), -1.0,
-                                   0.0, 0.0, ((-2.0*self.far*self.near)/(self.far-self.near)), 0.0],
-                                  dtype=np.float32)
+                                   0.0, 0.0, ((-2.0*self.far*self.near)/(self.far-self.near)),
+                                   0.0], dtype=np.float32)
 
         projection_location = glGetUniformLocation(shader_program, "projection")
         glUniformMatrix4fv(projection_location, 1, GL_FALSE, projection_mat)
