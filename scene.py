@@ -40,11 +40,11 @@ class Scene(object):
         glutInit()
         glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH
                             | GLUT_3_2_CORE_PROFILE)
-        glutInitWindowSize(512, 512)
+        glutInitWindowSize(768, 768)
         glutCreateWindow(b"Final Project - Stonehenge")
 
         glEnable(GL_DEPTH_TEST)
-        glClearColor(0.0, 0.0, 0.0, 0.0)
+        glClearColor(0.0, 0.4, 0.4, 1.0)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         glClearDepth(1.0)
 
@@ -77,6 +77,9 @@ class Scene(object):
 
         for obj in self.objects:
             obj.draw(self.shader_program)
+        
+        glutSwapBuffers()
+
 
 if __name__ == "__main__":
     Scene()

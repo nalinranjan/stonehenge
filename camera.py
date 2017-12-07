@@ -6,9 +6,9 @@ class Camera(object):
     lookat = [0.0, 0.0, 0.0]
     up = [0.0, 1.0, 0.0]
 
-    left, right = -1.0, 1.0
+    left, right = -1.2, 1.2
     bottom, top = -1.0, 1.0
-    near, far = 3.0, 105.0
+    near, far = 3.0, 205.0
 
     def __init__(self):
         self.eyepoint = np.array([*self.eyepoint], dtype=np.float32)

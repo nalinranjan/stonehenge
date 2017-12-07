@@ -34,10 +34,12 @@ class SceneObject(object):
                 SOIL_FLAG_INVERT_Y | SOIL_FLAG_MULTIPLY_ALPHA
             )
 
-            # glActiveTexture(GL_TEXTURE0)
+            glActiveTexture(GL_TEXTURE0 + self.texture)
             glBindTexture(GL_TEXTURE_2D, self.texture)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
         except Exception as soil_ex:
             print('SOIL_load_OGL_texture ERROR', soil_ex)
@@ -64,6 +66,8 @@ class SceneObject(object):
         glBufferSubData(GL_ARRAY_BUFFER, self.vertices.nbytes + self.normals.nbytes,
                         self.texture_uv.nbytes, self.texture_uv)
 
+        glBindVertexArray(0)
+
     def draw(self, shader_program):
         """
         Sends the required parameters to the vertex shader and renders the
@@ -75,8 +79,22 @@ class SceneObject(object):
         glUseProgram(shader_program)
 
         model_location = glGetUniformLocation(shader_program, "model")
+        tex_sampler_location = glGetUniformLocation(shader_program, "tex")
+        ambient_location = glGetUniformLocation(shader_program, "k_a")
+        diffuse_location = glGetUniformLocation(shader_program, "k_d")
+        specular_location = glGetUniformLocation(shader_program, "k_s")
+        shininess_location = glGetUniformLocation(shader_program, "n")
+
+        glActiveTexture(GL_TEXTURE0 + self.texture)
+        # glBindTexture(GL_TEXTURE_2D, self.texture)
+
         glUniformMatrix4fv(model_location, 1, GL_FALSE,
                            self.transform.transpose().reshape((1, 16)))
+        glUniform1i(tex_sampler_location, self.texture)
+        glUniform3fv(ambient_location, 1, self.k_ambient)
+        glUniform3fv(diffuse_location, 1, self.k_diffuse)
+        glUniform3fv(specular_location, 1, self.k_specular)
+        glUniform1f(shininess_location, self.shininess)
 
         vertex_location = glGetAttribLocation(shader_program, "vPosition")
         normal_location = glGetAttribLocation(shader_program, "vNormal")

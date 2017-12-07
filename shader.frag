@@ -47,4 +47,6 @@ void main()
     vec4 texColor = texture(tex, texCoords);
 
     finalColor = vec4(ambient + diffuse, 1.0) * texColor + vec4(specular, 1.0);
+    // finalColor = vec4(ambient + diffuse, 1.0) + vec4(specular, 1.0);
+    // finalColor = finalColor + vec4(1.0, 1.0, 1.0, 1.0);
 }
