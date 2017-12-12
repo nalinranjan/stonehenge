@@ -29,14 +29,19 @@ out vec3 lightPositionCam;
 // Texture coordinates
 out vec2 texCoords;
 
+out vec3 test;
+
 void main()
 {
     mat4 modelView = view * model;
     mat3 normalMatrix = mat3(transpose(inverse(modelView)));
 
-    // Transform vertex, light and normal to camera space    
+    // Transform vertex, light and normal to camera space
     vPositionCam = vec3(modelView * vec4(vPosition, 1.0));
+    // vPositionCam = vPosition;
     normalCam = normalize(normalMatrix * vNormal);
+    // normalCam = normalize(vNormal);
+    test = vPosition;
     lightPositionCam = mat3(view) * lightPosition;
 
     // Forward the texture coordinates to the fragment shader

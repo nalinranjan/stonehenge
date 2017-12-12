@@ -26,20 +26,22 @@ class SceneObject(object):
         """
         Create a texture from an image.
         """
+        # glActiveTexture(GL_TEXTURE0)
         try:
             self.texture = SOIL_load_OGL_texture(
                 texture_path,
                 SOIL_LOAD_AUTO,
                 SOIL_CREATE_NEW_ID,
-                SOIL_FLAG_INVERT_Y | SOIL_FLAG_MULTIPLY_ALPHA
+                SOIL_FLAG_INVERT_Y #|# SOIL_FLAG_MULTIPLY_ALPHA |
+                # SOIL_FLAG_TEXTURE_REPEATS
             )
 
-            glActiveTexture(GL_TEXTURE0 + self.texture)
-            glBindTexture(GL_TEXTURE_2D, self.texture)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+            # glActiveTexture(GL_TEXTURE0 + self.texture)
+            # glBindTexture(GL_TEXTURE_2D, self.texture)
+            # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+            # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+            # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+            # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
         except Exception as soil_ex:
             print('SOIL_load_OGL_texture ERROR', soil_ex)
@@ -67,6 +69,8 @@ class SceneObject(object):
                         self.texture_uv.nbytes, self.texture_uv)
 
         glBindVertexArray(0)
+        # glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        # glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     def draw(self, shader_program):
         """
@@ -77,6 +81,8 @@ class SceneObject(object):
         """
         glBindVertexArray(self.vao)
         glUseProgram(shader_program)
+        glActiveTexture(GL_TEXTURE0 + self.texture)
+        glBindTexture(GL_TEXTURE_2D, self.texture)
 
         model_location = glGetUniformLocation(shader_program, "model")
         tex_sampler_location = glGetUniformLocation(shader_program, "tex")
@@ -84,9 +90,6 @@ class SceneObject(object):
         diffuse_location = glGetUniformLocation(shader_program, "k_d")
         specular_location = glGetUniformLocation(shader_program, "k_s")
         shininess_location = glGetUniformLocation(shader_program, "n")
-
-        glActiveTexture(GL_TEXTURE0 + self.texture)
-        # glBindTexture(GL_TEXTURE_2D, self.texture)
 
         glUniformMatrix4fv(model_location, 1, GL_FALSE,
                            self.transform.transpose().reshape((1, 16)))
@@ -100,7 +103,6 @@ class SceneObject(object):
         normal_location = glGetAttribLocation(shader_program, "vNormal")
         texture_location = glGetAttribLocation(shader_program, "vTexCoords")
 
-        # Check stride argument in case of errors:
         glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0,
                               c_void_p(0))
         glVertexAttribPointer(normal_location, 3, GL_FLOAT, GL_FALSE, 0,
@@ -113,6 +115,8 @@ class SceneObject(object):
         glEnableVertexAttribArray(texture_location)
 
         glDrawElements(GL_TRIANGLES, len(self.elements), GL_UNSIGNED_SHORT, None)
+
+        glBindVertexArray(0)
 
     def scale(self, x, y, z):
         scale_mat = np.array([[x, 0.0, 0.0, 0.0],
