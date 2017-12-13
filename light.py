@@ -4,8 +4,8 @@ from OpenGL.GL import *
 class Light(object):
     position = [-20.0, 20.0, -50.0]
     # position = [0.0, 30.0, 0.0]
-    ambient = [1.0, 0.84, 0.84]
-    diffuse = [1.0, 0.84, 0.84]
+    ambient = [1.0, 0.9, 0.9]
+    diffuse = [1.0, 0.9, 0.9]
     specular = [1.0, 1.0, 1.0]
 
     def __init__(self):
