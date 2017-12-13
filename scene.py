@@ -30,23 +30,14 @@ class Scene(object):
         self.light.setup(self.shader_program)
         self.camera.setup(self.shader_program)
 
-        ground = Ground()
+        ground = Ground(self.shader_program)
         ground.scale(GROUND_SIZE, 1.0, GROUND_SIZE)
-        # ground.translate(0.0, 0.0, GROUND_SIZE)
         self.objects.append(ground)
 
-        # stone1 = Stone()
-        # stone1.scale(2.0, 3.0, 1.0)
-        # stone1.translate(0.0, 5.0, 0.0)
-        # self.objects.append(stone1)
-
-        # stone2 = Stone()
-        # stone2.scale(2.0, 3.0, 1.0)
-        # stone2.translate(8.0, 3.0, 2.0)
-        # self.objects.append(stone2)
+        self.setup_stones()
 
         glutDisplayFunc(self.display)
-        # glutIdleFunc(self.display)
+        glutIdleFunc(self.display)
         glutKeyboardFunc(self.handle_key)
 
         glutMainLoop()
@@ -61,7 +52,7 @@ class Scene(object):
 
         glEnable(GL_DEPTH_TEST)
         glClearColor(0.0, 0.2, 0.2, 1.0)
-        glViewport(0, 0, 768, 768)
+        # glViewport(0, 0, 768, 768)
         glEnable(GL_CULL_FACE)
         # glFrontFace(GL_CCW)
         glCullFace(GL_BACK)
@@ -80,6 +71,79 @@ class Scene(object):
         log = glGetProgramInfoLog(self.shader_program)
         if log:
             print(log)
+
+    def setup_stones(self):
+        stone1 = Stone(self.shader_program)
+        stone1.scale(1.5, 3.0, 0.7)
+        stone1.rotate(0.0, 20.0, 0.0)
+        stone1.translate(3.5, 3.0, 9.5)
+        self.objects.append(stone1)
+
+        stone2 = Stone(self.shader_program)
+        stone2.scale(1.5, 3.0, 0.7)
+        stone2.rotate(0.0, 45.0, 0.0)
+        stone2.translate(7.8, 3.0, 6.8)
+        self.objects.append(stone2)
+
+        stone3 = Stone(self.shader_program)
+        stone3.scale(3.5, 0.5, 0.7)
+        stone3.rotate(0.0, 32.5, 0.0)
+        stone3.translate(5.7, 6.5, 8.2)
+        self.objects.append(stone3)
+
+        stone4 = Stone(self.shader_program)
+        stone4.scale(1.5, 3.0, 0.7)
+        stone4.rotate(0.0, -25.0, 0.0)
+        stone4.translate(-4.5, 3.0, 9.2)
+        self.objects.append(stone4)
+
+        stone5 = Stone(self.shader_program)
+        stone5.scale(1.5, 3.0, 0.7)
+        stone5.rotate(0.0, -40.0, 0.0)
+        stone5.translate(-8.5, 3.0, 6.7)
+        self.objects.append(stone5)
+
+        stone6 = Stone(self.shader_program)
+        stone6.scale(1.5, 3.0, 0.7)
+        stone6.rotate(0.0, -55.0, 0.0)
+        stone6.translate(-11.8, 3.0, 3.0)
+        self.objects.append(stone6)
+
+        stone7 = Stone(self.shader_program)
+        stone7.scale(2.7, 0.5, 0.7)
+        stone7.rotate(0.0, -32.5, 0.0)
+        stone7.translate(-6.0, 6.5, 8.4)
+        self.objects.append(stone7)
+
+        stone8 = Stone(self.shader_program)
+        stone8.scale(2.7, 0.5, 0.7)
+        stone8.rotate(0.0, -47.5, 0.0)
+        stone8.translate(-10.5, 6.5, 4.7)
+        self.objects.append(stone8)
+
+        stone9 = Stone(self.shader_program)
+        stone9.scale(1.5, 3.2, 0.7)
+        stone9.rotate(0.0, 77.0, 0.0)
+        stone9.translate(11.5, 3.2, 1.8)
+        self.objects.append(stone9)
+
+        stone10 = Stone(self.shader_program)
+        stone10.scale(2.2, 4.0, 1.0)
+        stone10.rotate(0.0, 3.0, 0.0)
+        stone10.translate(-3.0, 4.0, -5.0)
+        self.objects.append(stone10)
+
+        stone11 = Stone(self.shader_program)
+        stone11.scale(2.2, 4.0, 1.0)
+        stone11.rotate(0.0, -3.0, 0.0)
+        stone11.translate(3.0, 4.0, -5.0)
+        self.objects.append(stone11)
+
+        stone12 = Stone(self.shader_program)
+        stone12.scale(5.5, 0.6, 0.9)
+        stone12.rotate(0.0, 0.0, 0.0)
+        stone12.translate(0.0, 8.6, -5.0)
+        self.objects.append(stone12)
 
     @staticmethod
     def compile_shader(shader_type, source_path):
@@ -114,8 +178,8 @@ class Scene(object):
         elif key == 'q':
             sys.exit(0)
         
-        self.display()
         # self.camera.setup_view(self.shader_program)
+        self.display()
 
 
 if __name__ == "__main__":

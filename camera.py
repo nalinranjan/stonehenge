@@ -3,12 +3,13 @@ import numpy as np
 from OpenGL.GL import *
 
 class Camera(object):
-    eyepoint = [0.0, 30.0, 40.0]
+    eyepoint = [0.0, 38.0, 50.0]
     lookat = [0.0, 0.0, 0.0]
+    # up = [0.0, 1.0, 0.0]
     up = [0.0, 1.0, 0.0]
 
-    left, right = -2.0, 2.0
-    bottom, top = -2.0, 2.0
+    left, right = -1.0, 1.0
+    bottom, top = -1.0, 1.0
     near, far = 3.0, 200.0
 
     def __init__(self):
@@ -57,6 +58,7 @@ class Camera(object):
                         [-sin_y, 0.0, cos_y, 0.0],
                         [0.0, 0.0, 0.0, 1.0]], dtype=np.float32)
         self.eyepoint = (mat @ np.append(self.eyepoint, 1.0))[0:3]
+        self.up = (mat @ np.append(self.up, 1.0))[0:3]
 
     @staticmethod
     def normalize(vector):

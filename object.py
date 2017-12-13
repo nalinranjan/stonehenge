@@ -32,8 +32,8 @@ class SceneObject(object):
                 texture_path,
                 SOIL_LOAD_AUTO,
                 SOIL_CREATE_NEW_ID,
-                SOIL_FLAG_INVERT_Y #|# SOIL_FLAG_MULTIPLY_ALPHA |
-                # SOIL_FLAG_TEXTURE_REPEATS
+                SOIL_FLAG_INVERT_Y |# SOIL_FLAG_MULTIPLY_ALPHA |
+                SOIL_FLAG_TEXTURE_REPEATS# | SOIL_FLAG_MIPMAPS
             )
 
             # glActiveTexture(GL_TEXTURE0 + self.texture)
@@ -46,7 +46,7 @@ class SceneObject(object):
         except Exception as soil_ex:
             print('SOIL_load_OGL_texture ERROR', soil_ex)
 
-    def set_buffers(self):
+    def set_buffers(self, shader_program):
         """
         Buffers the vertex, element and texture data.
         """
@@ -68,36 +68,7 @@ class SceneObject(object):
         glBufferSubData(GL_ARRAY_BUFFER, self.vertices.nbytes + self.normals.nbytes,
                         self.texture_uv.nbytes, self.texture_uv)
 
-        glBindVertexArray(0)
-        # glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
-        # glBindBuffer(GL_ARRAY_BUFFER, 0)
-
-    def draw(self, shader_program):
-        """
-        Sends the required parameters to the vertex shader and renders the
-        shape.
-
-        :param shader_program: The ID of the shader program to be used
-        """
-        glBindVertexArray(self.vao)
         glUseProgram(shader_program)
-        glActiveTexture(GL_TEXTURE0 + self.texture)
-        glBindTexture(GL_TEXTURE_2D, self.texture)
-
-        model_location = glGetUniformLocation(shader_program, "model")
-        tex_sampler_location = glGetUniformLocation(shader_program, "tex")
-        ambient_location = glGetUniformLocation(shader_program, "k_a")
-        diffuse_location = glGetUniformLocation(shader_program, "k_d")
-        specular_location = glGetUniformLocation(shader_program, "k_s")
-        shininess_location = glGetUniformLocation(shader_program, "n")
-
-        glUniformMatrix4fv(model_location, 1, GL_FALSE,
-                           self.transform.transpose().reshape((1, 16)))
-        glUniform1i(tex_sampler_location, self.texture)
-        glUniform3fv(ambient_location, 1, self.k_ambient)
-        glUniform3fv(diffuse_location, 1, self.k_diffuse)
-        glUniform3fv(specular_location, 1, self.k_specular)
-        glUniform1f(shininess_location, self.shininess)
 
         vertex_location = glGetAttribLocation(shader_program, "vPosition")
         normal_location = glGetAttribLocation(shader_program, "vNormal")
@@ -113,6 +84,38 @@ class SceneObject(object):
         glEnableVertexAttribArray(vertex_location)
         glEnableVertexAttribArray(normal_location)
         glEnableVertexAttribArray(texture_location)
+
+        glBindVertexArray(0)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+    def draw(self, shader_program):
+        """
+        Sends the required parameters to the vertex shader and renders the
+        shape.
+
+        :param shader_program: The ID of the shader program to be used
+        """
+        glBindVertexArray(self.vao)
+
+        model_location = glGetUniformLocation(shader_program, "model")
+        glUniformMatrix4fv(model_location, 1, GL_FALSE,
+                           self.transform.transpose().reshape((1, 16)))
+
+        ambient_location = glGetUniformLocation(shader_program, "k_a")
+        diffuse_location = glGetUniformLocation(shader_program, "k_d")
+        specular_location = glGetUniformLocation(shader_program, "k_s")
+        shininess_location = glGetUniformLocation(shader_program, "n")
+
+        glUniform3fv(ambient_location, 1, self.k_ambient)
+        glUniform3fv(diffuse_location, 1, self.k_diffuse)
+        glUniform3fv(specular_location, 1, self.k_specular)
+        glUniform1f(shininess_location, self.shininess)
+
+        glActiveTexture(GL_TEXTURE0 + self.texture)
+        glBindTexture(GL_TEXTURE_2D, self.texture)
+        tex_sampler_location = glGetUniformLocation(shader_program, "tex")
+        glUniform1i(tex_sampler_location, self.texture)
 
         glDrawElements(GL_TRIANGLES, len(self.elements), GL_UNSIGNED_SHORT, None)
 

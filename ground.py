@@ -15,8 +15,8 @@ class Ground(SceneObject):
     Class representing the ground in the scene.
     """
 
-    def __init__(self):
-        self.tessellate(5, 1)
+    def __init__(self, shader_program):
+        self.tessellate(10, 2)
 
         self.normals = np.array([0.0, 1.0, 0.0] * (len(self.vertices)//3),
                                 dtype=np.float32)
@@ -27,7 +27,7 @@ class Ground(SceneObject):
         self.shininess = 0.0
 
         self.load_texture(GRASS_TEXTURE_PATH)
-        self.set_buffers()
+        self.set_buffers(shader_program)
 
     def tessellate(self, divisions, tex_repetitions):
         vertices = []
