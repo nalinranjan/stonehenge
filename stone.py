@@ -1,5 +1,5 @@
 """
-ground.py
+stone.py
 
 Sets up the stones that make up Stonehenge.
 """
@@ -18,12 +18,12 @@ class Stone(SceneObject):
     def __init__(self, shader_program):
         self.tessellate(10)
 
-        self.k_ambient = np.array([0.3, 0.3, 0.3], dtype=np.float32)
-        self.k_diffuse = np.array([0.2, 0.2, 0.2], dtype=np.float32)
-        self.k_specular = np.array([0.1, 0.1, 0.1], dtype=np.float32)
-        self.shininess = 0.0
+        self.k_ambient = np.array([0.1, 0.15, 0.15], dtype=np.float32)
+        self.k_diffuse = np.array([0.1, 0.2, 0.2], dtype=np.float32)
+        self.k_specular = np.array([0.2, 0.2, 0.2], dtype=np.float32)
+        self.shininess = 2.0
 
-        self.load_texture(STONE_TEXTURE_PATH)
+        # self.load_texture(STONE_TEXTURE_PATH)
         self.set_buffers(shader_program)
 
     def tessellate(self, divisions):

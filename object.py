@@ -11,7 +11,7 @@ class SceneObject(object):
     texture_uv = np.array([], dtype=np.float32)
     transform = np.identity(4, dtype=np.float32)
 
-    texture = GLuint(0)
+    texture = 0
     vao = GLuint(0)
 
     k_ambient = np.array([], dtype=np.float32)
@@ -26,7 +26,6 @@ class SceneObject(object):
         """
         Create a texture from an image.
         """
-        # glActiveTexture(GL_TEXTURE0)
         try:
             self.texture = SOIL_load_OGL_texture(
                 texture_path,
@@ -60,30 +59,34 @@ class SceneObject(object):
 
         glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[1])
         glBufferData(GL_ARRAY_BUFFER, self.vertices.nbytes + self.normals.nbytes
-                     + self.texture_uv.nbytes, None, GL_STATIC_DRAW)
+                     + (self.texture_uv.nbytes if self.texture > 0 else 0),
+                     None, GL_STATIC_DRAW)
         glBufferSubData(GL_ARRAY_BUFFER, 0,
                         self.vertices.nbytes, self.vertices)
         glBufferSubData(GL_ARRAY_BUFFER, self.vertices.nbytes,
                         self.normals.nbytes, self.normals)
-        glBufferSubData(GL_ARRAY_BUFFER, self.vertices.nbytes + self.normals.nbytes,
-                        self.texture_uv.nbytes, self.texture_uv)
+        if self.texture > 0:
+            glBufferSubData(GL_ARRAY_BUFFER, self.vertices.nbytes + self.normals.nbytes,
+                            self.texture_uv.nbytes, self.texture_uv)
 
         glUseProgram(shader_program)
 
         vertex_location = glGetAttribLocation(shader_program, "vPosition")
         normal_location = glGetAttribLocation(shader_program, "vNormal")
-        texture_location = glGetAttribLocation(shader_program, "vTexCoords")
 
         glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0,
                               c_void_p(0))
         glVertexAttribPointer(normal_location, 3, GL_FLOAT, GL_FALSE, 0,
                               c_void_p(self.vertices.nbytes))
-        glVertexAttribPointer(texture_location, 2, GL_FLOAT, GL_FALSE, 0,
-                              c_void_p(self.vertices.nbytes + self.normals.nbytes))
 
         glEnableVertexAttribArray(vertex_location)
         glEnableVertexAttribArray(normal_location)
-        glEnableVertexAttribArray(texture_location)
+
+        if self.texture > 0:
+            texture_location = glGetAttribLocation(shader_program, "vTexCoords")
+            glVertexAttribPointer(texture_location, 2, GL_FLOAT, GL_FALSE, 0,
+                                  c_void_p(self.vertices.nbytes + self.normals.nbytes))
+            glEnableVertexAttribArray(texture_location)
 
         glBindVertexArray(0)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
@@ -96,6 +99,7 @@ class SceneObject(object):
 
         :param shader_program: The ID of the shader program to be used
         """
+        glUseProgram(shader_program)
         glBindVertexArray(self.vao)
 
         model_location = glGetUniformLocation(shader_program, "model")
@@ -112,10 +116,11 @@ class SceneObject(object):
         glUniform3fv(specular_location, 1, self.k_specular)
         glUniform1f(shininess_location, self.shininess)
 
-        glActiveTexture(GL_TEXTURE0 + self.texture)
-        glBindTexture(GL_TEXTURE_2D, self.texture)
-        tex_sampler_location = glGetUniformLocation(shader_program, "tex")
-        glUniform1i(tex_sampler_location, self.texture)
+        if self.texture > 0:
+            glActiveTexture(GL_TEXTURE0 + self.texture)
+            glBindTexture(GL_TEXTURE_2D, self.texture)
+            tex_sampler_location = glGetUniformLocation(shader_program, "tex")
+            glUniform1i(tex_sampler_location, self.texture)
 
         glDrawElements(GL_TRIANGLES, len(self.elements), GL_UNSIGNED_SHORT, None)
 

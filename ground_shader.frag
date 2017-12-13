@@ -32,8 +32,6 @@ uniform sampler2D tex;
 // Fragment color
 out vec4 finalColor;
 
-in vec3 test;
-
 void main()
 {
     // Calculate the required N, L, R and V vectors
