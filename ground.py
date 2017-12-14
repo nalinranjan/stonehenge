@@ -24,7 +24,7 @@ class Ground(SceneObject):
         :param shader_program: A unique ID for the shader_program to be used
                                with this object
         """
-        self.tessellate(10, 1)
+        self.tessellate(10, 3)
 
         self.normals = np.array([0.0, 1.0, 0.0] * (len(self.vertices)//3),
                                 dtype=np.float32)
