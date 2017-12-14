@@ -5,7 +5,6 @@ from OpenGL.GL import *
 class Camera(object):
     eyepoint = [0.0, 38.0, 50.0]
     lookat = [0.0, 0.0, 0.0]
-    # up = [0.0, 1.0, 0.0]
     up = [0.0, 1.0, 0.0]
 
     left, right = -1.0, 1.0

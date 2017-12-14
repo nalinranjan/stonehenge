@@ -1,11 +1,11 @@
 import sys
-import glfw
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from light import Light
 from camera import Camera
 from ground import Ground
 from stone import Stone
+from boulder import Boulder
 
 GROUND_VERTEX_SHADER = "ground_shader.vert"
 GROUND_FRAGMENT_SHADER = "ground_shader.frag"
@@ -35,6 +35,7 @@ class Scene(object):
         self.objects.append(ground)
 
         self.setup_stones()
+        self.setup_boulders()
 
         glutDisplayFunc(self.display)
         glutIdleFunc(self.display)
@@ -167,6 +168,32 @@ class Scene(object):
         stone12.rotate(0.0, 0.0, 0.0)
         stone12.translate(0.0, 8.6, -6.0)
         self.objects.append(stone12)
+
+    def setup_boulders(self):
+        boulder1 = Boulder(self.stone_shader_program)
+        boulder1.scale(1.0, 1.0, 1.0)
+        boulder1.translate(10.0, -0.2, -7.5)
+        self.objects.append(boulder1)
+
+        boulder2 = Boulder(self.stone_shader_program)
+        boulder2.scale(1.3, 1.3, 1.3)
+        boulder2.translate(8.0, -0.4, -9.0)
+        self.objects.append(boulder2)
+
+        boulder3 = Boulder(self.stone_shader_program)
+        boulder3.scale(2.0, 2.0, 2.0)
+        boulder3.translate(-0.8, -1.0, 1.3)
+        self.objects.append(boulder3)
+
+        boulder4 = Boulder(self.stone_shader_program)
+        boulder4.scale(1.7, 1.7, 1.7)
+        boulder4.translate(-4.1, -0.8, 0.1)
+        self.objects.append(boulder4)
+
+        boulder5 = Boulder(self.stone_shader_program)
+        boulder5.scale(1.3, 1.3, 1.3)
+        boulder5.translate(2.8, -0.5, 0.5)
+        self.objects.append(boulder5)
 
     def display(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
