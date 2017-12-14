@@ -1,3 +1,10 @@
+"""
+object.py
+
+Contains the base class SceneObject from which all objects making up the
+scene are derived.
+"""
+
 import math
 import numpy as np
 from OpenGL.GL import *
@@ -5,6 +12,10 @@ from pysoil import *
 from ctypes import c_void_p
 
 class SceneObject(object):
+    """
+    Represents an object in the scene. Contains methods to load textures,
+    buffer data to the GPU, perform model transforms and render the object.
+    """
     vertices = np.array([], dtype=np.float32)
     elements = np.array([], dtype=np.float32)
     normals = np.array([], dtype=np.float32)
@@ -19,44 +30,42 @@ class SceneObject(object):
     k_specular = np.array([], dtype=np.float32)
     shininess = 0.0
 
-    def __init__(self):
-        pass
-
     def load_texture(self, texture_path):
         """
-        Create a texture from an image.
+        Creates a texture from an image.
+
+        :param texture_path: The path of the texture image.
         """
         try:
             self.texture = SOIL_load_OGL_texture(
                 texture_path,
                 SOIL_LOAD_AUTO,
                 SOIL_CREATE_NEW_ID,
-                SOIL_FLAG_INVERT_Y |# SOIL_FLAG_MULTIPLY_ALPHA |
-                SOIL_FLAG_TEXTURE_REPEATS# | SOIL_FLAG_MIPMAPS
+                SOIL_FLAG_INVERT_Y | SOIL_FLAG_TEXTURE_REPEATS
             )
-
-            # glActiveTexture(GL_TEXTURE0 + self.texture)
-            # glBindTexture(GL_TEXTURE_2D, self.texture)
-            # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-            # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-            # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-            # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
         except Exception as soil_ex:
             print('SOIL_load_OGL_texture ERROR', soil_ex)
 
     def set_buffers(self, shader_program):
         """
-        Buffers the vertex, element and texture data.
+        Buffers the vertex, element, normal and texture data to the GPU.
+
+        :param shader_program: A unique ID for the shader_program to be used
+                               with this object
         """
+        # Generate a Vertex Array Object
         self.vao = glGenVertexArrays(1)
         glBindVertexArray(self.vao)
 
+        # Generate buffers for elements and vertices
         buffer_objects = glGenBuffers(2)
 
+        # Buffer element data
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[0])
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.elements, GL_STATIC_DRAW)
 
+        # Buffer vertex data (position, normal and texture)
         glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[1])
         glBufferData(GL_ARRAY_BUFFER, self.vertices.nbytes + self.normals.nbytes
                      + (self.texture_uv.nbytes if self.texture > 0 else 0),
@@ -71,6 +80,7 @@ class SceneObject(object):
 
         glUseProgram(shader_program)
 
+        # Set attribute pointers in the shader program
         vertex_location = glGetAttribLocation(shader_program, "vPosition")
         normal_location = glGetAttribLocation(shader_program, "vNormal")
 
@@ -88,6 +98,7 @@ class SceneObject(object):
                                   c_void_p(self.vertices.nbytes + self.normals.nbytes))
             glEnableVertexAttribArray(texture_location)
 
+        # Unbind the buffer objects
         glBindVertexArray(0)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
@@ -97,15 +108,17 @@ class SceneObject(object):
         Sends the required parameters to the vertex shader and renders the
         shape.
 
-        :param shader_program: The ID of the shader program to be used
+        :param shader_program: A unique ID for the shader_program to be used
         """
         glUseProgram(shader_program)
         glBindVertexArray(self.vao)
 
+        # Pass the model matrix to the shader
         model_location = glGetUniformLocation(shader_program, "model")
         glUniformMatrix4fv(model_location, 1, GL_FALSE,
                            self.transform.transpose().reshape((1, 16)))
 
+        # Pass the material properties to the shader
         ambient_location = glGetUniformLocation(shader_program, "k_a")
         diffuse_location = glGetUniformLocation(shader_program, "k_d")
         specular_location = glGetUniformLocation(shader_program, "k_s")
@@ -116,17 +129,26 @@ class SceneObject(object):
         glUniform3fv(specular_location, 1, self.k_specular)
         glUniform1f(shininess_location, self.shininess)
 
+        # Pass texture data to the sampler if the object has a texure
         if self.texture > 0:
             glActiveTexture(GL_TEXTURE0 + self.texture)
             glBindTexture(GL_TEXTURE_2D, self.texture)
             tex_sampler_location = glGetUniformLocation(shader_program, "tex")
             glUniform1i(tex_sampler_location, self.texture)
 
+        # Render the object
         glDrawElements(GL_TRIANGLES, len(self.elements), GL_UNSIGNED_SHORT, None)
 
         glBindVertexArray(0)
 
     def scale(self, x, y, z):
+        """
+        Modifies the current model transform to scale the object.
+
+        :param x: The scale value in the x-direction
+        :param y: The scale value in the y-direction
+        :param z: The scale value in the z-direction
+        """
         scale_mat = np.array([[x, 0.0, 0.0, 0.0],
                               [0.0, y, 0.0, 0.0],
                               [0.0, 0.0, z, 0.0],
@@ -134,6 +156,14 @@ class SceneObject(object):
         self.transform = scale_mat @ self.transform
 
     def rotate(self, x, y, z):
+        """
+        Modifies the current model transform to rotate the object. The order of
+        rotation is y -> z -> x.
+
+        :param x: The rotation angle (in degrees) in the x-direction
+        :param y: The rotation angle (in degrees) in the y-direction
+        :param z: The rotation angle (in degrees) in the z-direction
+        """
         x = math.radians(x)
         y = math.radians(y)
         z = math.radians(z)
@@ -161,6 +191,13 @@ class SceneObject(object):
         self.transform = x_mat @ z_mat @ y_mat @ self.transform
 
     def translate(self, x, y, z):
+        """
+        Modifies the current model transform to translate the object.
+
+        :param x: The translation value in the x-direction
+        :param y: The translation value in the y-direction
+        :param z: The translation value in the z-direction
+        """
         translate_mat = np.array([[1.0, 0.0, 0.0, x],
                                   [0.0, 1.0, 0.0, y],
                                   [0.0, 0.0, 1.0, z],

@@ -1,3 +1,9 @@
+"""
+scene.py
+
+The driver program. Sets up the scene and its components and displays it.
+"""
+
 import sys
 from OpenGL.GL import *
 from OpenGL.GLUT import *
@@ -15,6 +21,11 @@ STONE_FRAGMENT_SHADER = "stone_shader.frag"
 GROUND_SIZE = 20.0
 
 class Scene(object):
+    """
+    A class encapsulating the entire scene. Contains methods to initialize the
+    OpenGL context, setup the camera and lighting, setup the shaders and the
+    components of the scene. Displays the scene and handles user input.
+    """
     light = None
     camera = None
     ground_shader_program = None
@@ -23,6 +34,9 @@ class Scene(object):
     objects = []
 
     def __init__(self):
+        """
+        Constructor. Executes the entire 3D pipeline.
+        """
         self.init_glut()
 
         self.light = Light()
@@ -38,13 +52,15 @@ class Scene(object):
         self.setup_boulders()
 
         glutDisplayFunc(self.display)
-        glutIdleFunc(self.display)
         glutKeyboardFunc(self.handle_key)
 
         glutMainLoop()
 
     @staticmethod
     def init_glut():
+        """
+        Sets up the OpenGL context using GLUT.
+        """
         glutInit()
         glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE | GLUT_DEPTH
                             | GLUT_3_2_CORE_PROFILE)
@@ -53,15 +69,17 @@ class Scene(object):
 
         glEnable(GL_DEPTH_TEST)
         glClearColor(0.0, 0.2, 0.2, 1.0)
-        # glViewport(0, 0, 768, 768)
         glEnable(GL_CULL_FACE)
-        # glFrontFace(GL_CCW)
         glCullFace(GL_BACK)
-        # glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         glClearDepth(1.0)
 
     def setup_shaders(self):
+        """
+        Compiles vertex and fragment shaders and links them to shader programs
+        used in the scene. Two sets of shaders are used - one for the ground
+        and one for the stones.
+        """
         vertex_shader = self.compile_shader(GL_VERTEX_SHADER, GROUND_VERTEX_SHADER)
         fragment_shader = self.compile_shader(GL_FRAGMENT_SHADER, GROUND_FRAGMENT_SHADER)
         self.ground_shader_program = self.linkProgram(vertex_shader, fragment_shader)
@@ -75,6 +93,15 @@ class Scene(object):
 
     @staticmethod
     def compile_shader(shader_type, source_path):
+        """
+        Compiles a shader from a given source file and returns a unique ID
+        representing it.
+
+        :param shader_type: The type of shader
+        :param source_path: The path of the shader source file
+
+        :return: A unique ID representing the compiled shader
+        """
         with open(source_path) as shader_file:
             source = shader_file.read()
         shader = glCreateShader(shader_type)
@@ -87,6 +114,15 @@ class Scene(object):
 
     @staticmethod
     def linkProgram(vertex_shader, fragment_shader):
+        """
+        Creates and returns a shader program after linking a vertex and
+        fragment shader to it.
+
+        :param vertex_shader: A unique ID representing the vertex shader
+        :param fragment_shader: A unique ID representing the fragment shader
+
+        :return: A unique ID representing the shader program
+        """
         shader_program = glCreateProgram()
         glAttachShader(shader_program, vertex_shader)
         glAttachShader(shader_program, fragment_shader)
@@ -97,6 +133,10 @@ class Scene(object):
         return shader_program
 
     def setup_stones(self):
+        """
+        Creates objects for the gray stones that make up Stonehenge and applies
+        model transforms to them.
+        """
         stone1 = Stone(self.stone_shader_program)
         stone1.scale(1.5, 3.0, 0.7)
         stone1.rotate(0.0, 20.0, 0.0)
@@ -170,6 +210,10 @@ class Scene(object):
         self.objects.append(stone12)
 
     def setup_boulders(self):
+        """
+        Creates objects for the boulders present along Stonehenge and applies
+        model transforms to them.
+        """
         boulder1 = Boulder(self.stone_shader_program)
         boulder1.scale(1.0, 1.0, 1.0)
         boulder1.translate(10.0, -0.2, -7.5)
@@ -196,13 +240,18 @@ class Scene(object):
         self.objects.append(boulder5)
 
     def display(self):
+        """
+        Displays the scene on the current OpenGL window.
+        """
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+        # Set up parameters for the ground
         glUseProgram(self.ground_shader_program)
         self.camera.setup(self.ground_shader_program)
         self.light.setup(self.ground_shader_program)
         self.objects[0].draw(self.ground_shader_program)
 
+        # Set up parameters for the stones and boulders
         glUseProgram(self.stone_shader_program)
         self.camera.setup(self.stone_shader_program)
         self.light.setup(self.stone_shader_program)
@@ -213,21 +262,28 @@ class Scene(object):
         glutSwapBuffers()
 
     def handle_key(self, *args):
+        """
+        Handles user input to rotate the scene or quit.
+
+        :param *args: User input parameters passed by GLUT
+        """
         key = args[0].decode()
+
+        # Rotate the scene clockwise
         if key == 'a':
             for obj in self.objects:
                 obj.rotate(0, 2, 0)
-            # self.camera.rotate(-2)
+
+        # Rotate the scene counter-clockwise
         elif key == 'd':
             for obj in self.objects:
                 obj.rotate(0, -2, 0)
-            # self.camera.rotate(2)
+
+        # Close the window
         elif key == 'q':
             sys.exit(0)
-        
-        # self.camera.setup_view(self.shader_program)
-        self.display()
 
+        self.display()
 
 if __name__ == "__main__":
     Scene()

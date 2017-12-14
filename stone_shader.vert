@@ -25,6 +25,7 @@ out vec3 lightPositionCam;
 
 void main()
 {
+    // Generate the model-view and normal matrices
     mat4 modelView = view * model;
     mat3 normalMatrix = mat3(transpose(inverse(modelView)));
 
@@ -32,7 +33,7 @@ void main()
     vPositionCam = vec3(modelView * vec4(vPosition, 1.0));
     normalCam = normalize(normalMatrix * vNormal);
     lightPositionCam = mat3(view) * lightPosition;
-    
+
     // Transform the vertex location into clip space
     gl_Position =  projection * view * model * vec4(vPosition, 1.0);
 }

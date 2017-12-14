@@ -8,14 +8,19 @@ import numpy as np
 from OpenGL.GL import *
 from object import SceneObject
 
-# STONE_TEXTURE_PATH = b"stone_texture.jpg"
-
 class Stone(SceneObject):
     """
     Class representing a stone in the scene.
     """
 
     def __init__(self, shader_program):
+        """
+        Contructor. Tesselates the shape, sets normals and elements. Sets up
+        material properties. Buffers all the data to the GPU.
+
+        :param shader_program: A unique ID for the shader_program to be used
+                               with this object
+        """
         self.tessellate(10)
 
         self.k_ambient = np.array([0.15, 0.25, 0.25], dtype=np.float32)
@@ -23,10 +28,15 @@ class Stone(SceneObject):
         self.k_specular = np.array([0.3, 0.3, 0.3], dtype=np.float32)
         self.shininess = 2.0
 
-        # self.load_texture(STONE_TEXTURE_PATH)
         self.set_buffers(shader_program)
 
     def tessellate(self, divisions):
+        """
+        Calculates the vertices, triangles and normals at the vertices of a
+        stone object. A stone is represented as a cuboid.
+
+        :param divisions: The number of subdivisions for tessellation
+        """
         start, end = -1.0, 1.0
         step = (end - start) / divisions
 
@@ -131,10 +141,8 @@ class Stone(SceneObject):
                 elements.append(num_vertices + i * (divisions + 1) + j)
 
         vertices = [x for vertex in vertices for x in vertex]
-        # texture_uv = [x for tex_coord in texture_uv for x in tex_coord]
         normals = [x for normal in normals for x in normal]
 
         self.vertices = np.array(vertices, dtype=np.float32)
         self.elements = np.array(elements, dtype=np.uint16)
-        # self.texture_uv = np.array(texture_uv, dtype=np.float32)
         self.normals = np.array(normals, dtype=np.float32)

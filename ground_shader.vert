@@ -31,6 +31,7 @@ out vec2 texCoords;
 
 void main()
 {
+    // Generate the model-view and normal matrices
     mat4 modelView = view * model;
     mat3 normalMatrix = mat3(transpose(inverse(modelView)));
 
